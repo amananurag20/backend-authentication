@@ -6,7 +6,9 @@ const jwt = require("jsonwebtoken");
 const app = express();
 
 const userModel = require("./models/userSchema");
-const {signup,login}= require("./controllers/userController")
+const {signup,login, getUsers,getCurrentUser}= require("./controllers/userController")
+const verifyToken=require("./middleware/authMiddleware");
+
 
 const dbConnect = async () => {
   try {
@@ -32,6 +34,9 @@ app.get("/", (req, res) => {
 
 app.post("/user/signup", signup);
 app.post("/user/login", login);
+
+app.get("/user",verifyToken,getUsers);
+app.get("/userone",verifyToken,getCurrentUser)
 
 
 app.listen(5000, () => {

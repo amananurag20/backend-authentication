@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const userModel = require("../models/userSchema");
 const bcrypt = require("bcrypt");
-const jwt= require("jsonwebtoken");
+const jwt = require("jsonwebtoken");
 
 const signup = async (req, res) => {
   const { email, name, password } = req.body; // extracting data from req.body
@@ -37,33 +37,59 @@ const login = async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {
     return res.json({ message: "email or password required", success: false }); //checking if email or password is empty or not
-  }  
+  }
+  try {
+    let existingUser = await userModel.findOne({ email: email });
+    if (!existingUser) {
+      return res.json({ message: "User not registered", success: false });
+    }
+
+    const isPaswordCorrect = await bcrypt.compare(
+      password,
+      existingUser.password
+    );
+
+    if (!isPaswordCorrect) {
+      return res.json({ message: "Wrong credential", success: false });
+    }
+
+    const token = jwt.sign({ email: existingUser.email }, "helloworld", {
+      expiresIn: "1h",
+    });
+
+    return res.json({
+      message: "User Login successfully",
+      token,
+      success: true,
+    });
+  } catch (error) {
+    console.log(error);
+    res.json({ message: "Something went wrong", success: false });
+  }
+};
+
+const getUsers = async (req, res) => {
+  //if user is loggedIn then send the data only
+
+  try {
+    const allUsers = await userModel.find({});
+    return res.json({ success: true, users: allUsers });
+  } catch (error) {
+    console.log(error);
+    res.json({ message: "Something went wrong", success: false });
+  }
+};
+
+const getCurrentUser= async(req,res)=>{
+
   try{
-    
-    let existingUser= await userModel.findOne({email});
-    if(!existingUser){
-        return res.json({message:"User not registered",success:false});
-    }
-
-    const isPaswordCorrect= await bcrypt.compare(password,existingUser.password);
-    
-    if(!isPaswordCorrect){
-       return  res.json({message:"Wrong creadential",success:false})
-    }
-    
-   const token= jwt.sign({email:existingUser.email},"helloworld",{
-    expiresIn:"1h"
-   })
-  
-   return res.json({message:"User Login successfully",token,success:true})
-
+    const user= await userModel.findOne({email:req.email});
+    res.json({success:true,user:user});
 
   }catch(error){
     console.log(error);
-    res.json({message:"Something went wrong",success:false})
+    res.json({msg:"something went wrong", success:false})
   }
+}
 
-
-};
-
-module.exports = { signup,login };
+module.exports = { signup, login, getUsers,getCurrentUser };
