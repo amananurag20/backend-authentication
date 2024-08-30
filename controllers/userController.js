@@ -56,10 +56,13 @@ const login = async (req, res) => {
     const token = jwt.sign({ email: existingUser.email }, "helloworld", {
       expiresIn: "1h",
     });
-
+     
+    res.cookie("token",token,{
+      httpOnly: true,
+      expires: new Date(Date.now()+ 1000*60*60)
+    })
     return res.json({
       message: "User Login successfully",
-      token,
       success: true,
     });
   } catch (error) {

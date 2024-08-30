@@ -1,13 +1,9 @@
 const express = require("express");
 const mongoose = require("mongoose");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
+const cookieParser= require("cookie-parser");
 
 const app = express();
-
-const userModel = require("./models/userSchema");
-const {signup,login, getUsers,getCurrentUser}= require("./controllers/userController")
-const verifyToken=require("./middleware/authMiddleware");
+const userRouter= require("./routes/userRoutes")
 
 
 const dbConnect = async () => {
@@ -26,18 +22,11 @@ dbConnect();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-
-app.get("/", (req, res) => {  
-  res.json({ message: "working correctly"});
-});
+app.use(cookieParser())
 
 
-app.post("/user/signup", signup);
-app.post("/user/login", login);
 
-app.get("/user",verifyToken,getUsers);
-app.get("/userone",verifyToken,getCurrentUser)
-
+app.use("/user",userRouter);
 
 app.listen(5000, () => {
   console.log("Server is listinig on port no 5000");
