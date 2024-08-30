@@ -95,4 +95,20 @@ const getCurrentUser= async(req,res)=>{
   }
 }
 
-module.exports = { signup, login, getUsers,getCurrentUser };
+const logout=(req,res)=>{
+ 
+  // res.cookie("token", "",{
+  //   httpOnly:true,
+  //   expires:new Date(0)
+  // });
+
+  res.clearCookie("token");
+  return res.json({
+    message: "User logged out successfully",
+    success: true,
+  });
+};
+
+
+
+module.exports = { signup, login, getUsers,getCurrentUser, logout};
